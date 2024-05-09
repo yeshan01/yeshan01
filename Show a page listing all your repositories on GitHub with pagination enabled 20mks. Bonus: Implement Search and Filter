@@ -1,0 +1,54 @@
+jsx
+// RepositoryList.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import ReactPaginate from 'react-paginate';
+
+const RepositoryList = () => {
+  const [repositories, setRepositories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRepositories, setFilteredRepositories] = useState([]);
+  
+  useEffect(() => {
+    axios.get('https://api.github.com/users/your_username/repos')
+      .then(response => {
+        setRepositories(response.data);
+        setFilteredRepositories(response.data);
+      })
+      .catch(error => console.error(error));
+  }, []);
+
+  const handlePageClick = (data) => {
+    // Logic to handle page change
+  };
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    const filtered = repositories.filter(repo => repo.name.toLowerCase().includes(event.target.value.toLowerCase()));
+    setFilteredRepositories(filtered);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search repositories"
+        value={searchTerm}
+        onChange={handleSearch}
+      />
+      <ul>
+        {filteredRepositories.map(repo => (
+          <RepositoryItem key={repo.id} repo={repo} />
+        ))}
+      </ul>
+      <ReactPaginate
+        pageCount={Math.ceil(filteredRepositories.length / 10)} // Assuming 10 items per page
+        pageRangeDisplayed={5}
+        marginPagesDisplayed={2}
+        onPageChange={handlePageClick}
+      />
+    </div>
+  );
+};
+
+export default RepositoryList;
